@@ -50,7 +50,7 @@ public class PermissionService {
     public PermissionEntity updatePermission(Long id, PermissionRequest request){
         PermissionEntity permission = this.permissionRepository.findById(id).orElseThrow  (() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Permission not found"));
 
-        if(!Objects.equals(permission.getName(), request.getName()) && this.permissionRepository.findByName(permission.getName()).isPresent()){
+        if(!Objects.equals(permission.getName(), request.getName()) && this.permissionRepository.findByName(request.getName()).isPresent()){
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Permission already exists");
         }
 

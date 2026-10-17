@@ -1,34 +1,22 @@
 package com.template.templateapi.web.controller;
 
-import com.template.templateapi.persistence.entity.PermissionEntity;
-import com.template.templateapi.persistence.entity.RoleEntity;
 import com.template.templateapi.persistence.entity.UserEntity;
 import com.template.templateapi.service.AuthService;
-import com.template.templateapi.service.RoleService;
-import com.template.templateapi.service.UserService;
 import com.template.templateapi.service.dto.request.ChangePasswordRequest;
 import com.template.templateapi.service.dto.request.LoginRequest;
 import com.template.templateapi.service.dto.request.RegisterRequest;
 import com.template.templateapi.service.dto.response.user.UserResponse;
-import com.template.templateapi.web.config.JwtUtil;
 import com.template.templateapi.web.response.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth")

@@ -15,7 +15,7 @@ public class PermissionResponse {
     public static PermissionResponse fromEntity(PermissionEntity permission) {
         PermissionResponse response = new PermissionResponse();
 
-        permission.setId(permission.getId());
+        response.setId(permission.getId());
         response.setName(permission.getName());
         response.setCreatedAt(permission.getCreatedDate());
         response.setUpdatedAt(permission.getModifiedDate());
