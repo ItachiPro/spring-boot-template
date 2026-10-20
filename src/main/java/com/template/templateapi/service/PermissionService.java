@@ -32,11 +32,11 @@ public class PermissionService {
     }
 
     public PermissionEntity getPermissionById(Long id) {
-        return this.permissionRepository.findById(id).orElse(null);
+        return this.permissionRepository.findById(id).orElseThrow(()   -> new EntityNotFoundException("Permission not found."));
     }
 
     public PermissionEntity getPermissionByName(String name){
-        return this.permissionRepository.findByName(name).orElse(null);
+        return this.permissionRepository.findByName(name).orElseThrow(()-> new EntityNotFoundException("Permission not found."));
     }
 
     public PermissionEntity savePermission(PermissionEntity permissionEntity){

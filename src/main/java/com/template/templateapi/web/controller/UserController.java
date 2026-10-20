@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -83,27 +84,21 @@ public class UserController {
     }
 
     @PutMapping("/{id}/roles")
-    public ResponseEntity<ApiResponse<UserResponse>> assignRoles(@Valid @RequestBody AssignRolesRequest request, @PathVariable Long id, Authentication authentication){
-        Long currentId = this.userService.getIdByUsername(authentication.getName());
-
+    public ResponseEntity<ApiResponse<UserResponse>> assignRoles(@Valid @RequestBody AssignRolesRequest request, @PathVariable Long id, @AuthenticationPrincipal Long currentId){
         UserEntity saved = this.userService.assignRoles(id, request.getRoles(), currentId);
 
         return ApiResponse.success(UserResponse.fromEntity(saved), "Roles assigned successfully.", HttpStatus.OK);
     }
 
-    @PutMapping("{id}/permissions")
-    public ResponseEntity<ApiResponse<UserResponse>> assignPermission(@Valid @RequestBody AssignPermissionRequest request, @PathVariable Long id, Authentication authentication){
-        Long currentId = this.userService.getIdByUsername(authentication.getName());
-
+    @PutMapping("/{id}/permissions")
+    public ResponseEntity<ApiResponse<UserResponse>> assignPermission(@Valid @RequestBody AssignPermissionRequest request, @PathVariable Long id, @AuthenticationPrincipal Long currentId){
         UserEntity saved = this.userService.assignPermission(id, request.getPermissions(), currentId);
 
         return ApiResponse.success(UserResponse.fromEntity(saved), "Permissions assigned successfully.", HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id,  Authentication authentication){
-        Long currentId = (Long) authentication.getPrincipal();
-
+    public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal Long currentId){
         this.userService.deleteUser(id,  currentId);
 
         return ApiResponse.deleted();

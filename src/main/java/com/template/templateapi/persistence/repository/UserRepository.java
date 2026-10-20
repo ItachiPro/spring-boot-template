@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,32 +20,32 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             "LEFT JOIN FETCH r.permissions " +
             "LEFT JOIN FETCH u.permissions " +
             "WHERE u.username = :username")
-    Optional<UserEntity> findByUsernameWithRolesAndPermission(String username);
+    Optional<UserEntity> findByUsernameWithRolesAndPermission(@Param("username") String username);
 
     @Query("SELECT u FROM UserEntity u " +
             "WHERE u.id <> :currentUserId " +
             "AND NOT EXISTS (SELECT 1 FROM u.roles r WHERE r.name = :hiddenRole)")
-    List<UserEntity> findAllVisible(Long currentUserId, String hiddenRole);
+    List<UserEntity> findAllVisible(@Param("currentUserId") Long currentUserId, @Param("hiddenRole") String hiddenRole);
 
     @Query("SELECT u FROM UserEntity u " +
             "WHERE u.id <> :currentUserId " +
             "AND NOT EXISTS (SELECT 1 FROM u.roles r WHERE r.name = :hiddenRole)")
-    Page<UserEntity> findVisibleUsers(Long currentUserId, String hiddenRole, Pageable pageable);
+    Page<UserEntity> findVisibleUsers(@Param("currentUserId") Long currentUserId, @Param("hiddenRole") String hiddenRole, Pageable pageable);
 
     @Query("SELECT u FROM UserEntity u " +
             "WHERE u.id = :id " +
             "AND NOT EXISTS (SELECT 1 FROM u.roles r WHERE r.name = :hiddenRole)")
-    Optional<UserEntity> findVisibleById(Long id, String hiddenRole);
+    Optional<UserEntity> findVisibleById(Long id, @Param("hiddenRole") String hiddenRole);
 
     @Query("SELECT u FROM UserEntity u " +
             "WHERE u.username = :username " +
             "AND NOT EXISTS (SELECT 1 FROM u.roles r WHERE r.name = :hiddenRole)")
-    Optional<UserEntity> findVisibleByUsername(String username, String hiddenRole);
+    Optional<UserEntity> findVisibleByUsername(@Param("username") String username, @Param("hiddenRole") String hiddenRole);
 
     @Query("SELECT u FROM UserEntity u " +
             "WHERE u.email = :email " +
             "AND NOT EXISTS (SELECT 1 FROM u.roles r WHERE r.name = :hiddenRole)")
-    Optional<UserEntity> findVisibleByEmail(String username, String hiddenRole);
+    Optional<UserEntity> findVisibleByEmail(@Param("email") String email, @Param("hiddenRole") String hiddenRole);
 
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);

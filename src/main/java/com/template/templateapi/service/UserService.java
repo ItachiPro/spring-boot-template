@@ -20,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -100,9 +101,10 @@ public class UserService {
 
         UserEntity user = findVisibleOrFail(id);
 
-        List<RoleEntity> foundRoles = this.roleRepository.findAllById(roleIds);
+        Set<Long> uniqueIds = new HashSet<>(roleIds);
+        List<RoleEntity> foundRoles = this.roleRepository.findAllById(uniqueIds);
 
-        if(foundRoles.size() != roleIds.size()){
+        if(foundRoles.size() != uniqueIds.size()){
             throw new EntityNotFoundException("One or more roles not found.");
         }
 
@@ -120,9 +122,10 @@ public class UserService {
 
         UserEntity user = findVisibleOrFail(id);
 
-        List<PermissionEntity> foundPermissions = this.permissionRepository.findAllById(permissionIds);
+        Set<Long> uniqueIds = new HashSet<>(permissionIds);
+        List<PermissionEntity> foundPermissions = this.permissionRepository.findAllById(uniqueIds);
 
-        if(foundPermissions.size() != permissionIds.size()){
+        if(foundPermissions.size() != uniqueIds.size()){
             throw new EntityNotFoundException("One or more permissions not found.");
         }
 

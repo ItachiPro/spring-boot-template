@@ -7,7 +7,6 @@ import com.template.templateapi.persistence.repository.PermissionRepository;
 import com.template.templateapi.persistence.repository.RoleRepository;
 import com.template.templateapi.service.dto.request.role.RoleRequest;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -17,35 +16,37 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class RoleService {
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
 
-    @Autowired
     public RoleService(RoleRepository roleRepository, PermissionRepository permissionRepository) {
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
     }
 
     public List<RoleEntity> getAll() {
-        return this.roleRepository.findAll();
+        return this.roleRepository.findAllVisibleRoles(RoleNames.SUPER_ADMIN);
     }
 
     public Page<RoleEntity> getAll(Pageable pageable) {
-        return this.roleRepository.findAll(pageable);
+        return this.roleRepository.findAllVisibleRoles(RoleNames.SUPER_ADMIN, pageable);
     }
 
     public RoleEntity getRoleById(Long id) {
-        return this.roleRepository.findById(id).orElse(null);
+        return this.roleRepository.findByIdAndNameNot(id, RoleNames.SUPER_ADMIN).orElseThrow(() -> new EntityNotFoundException("Role not found."));
     }
 
     public RoleEntity getRoleByName(String name){
-        return this.roleRepository.findByName(name).orElse(null);
+        return this.roleRepository.findByName(name).orElseThrow(()  -> new EntityNotFoundException("Role not found."));
     }
 
     public RoleEntity saveRole(RoleEntity roleEntity){
+        assertNotReserved(roleEntity.getName());
+
         if(this.roleRepository.findByName(roleEntity.getName()).isPresent()){
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Role already exists.");
         }
@@ -54,11 +55,9 @@ public class RoleService {
     }
 
     public RoleEntity updateRole(Long id, RoleRequest request){
-        RoleEntity role = this.roleRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found"));
+        assertNotReserved(request.getName());
 
-        if(RoleNames.SUPER_ADMIN.equals(role.getName()) || RoleNames.SUPER_ADMIN.equals(request.getName())){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This role cannot be modified.");
-        }
+        RoleEntity role = findEditableRole(id);
 
         if (!Objects.equals(role.getName(), request.getName()) && this.roleRepository.findByName(request.getName()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Role already exists.");
@@ -70,15 +69,12 @@ public class RoleService {
     }
 
     public RoleEntity assignPermission(Long id, List<Long> permissionIds){
-        RoleEntity role = this.roleRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found"));
+        RoleEntity role = findEditableRole(id);
 
-        if(RoleNames.SUPER_ADMIN.equals(role.getName())){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This role cannot be modified.");
-        }
+        Set<Long> uniqueIds = new HashSet<>(permissionIds);
+        List<PermissionEntity> foundPermissions = this.permissionRepository.findAllById(uniqueIds);
 
-        List<PermissionEntity> foundPermissions = this.permissionRepository.findAllById(permissionIds);
-
-        if(foundPermissions.size() != permissionIds.size()){
+        if(foundPermissions.size() != uniqueIds.size()){
             throw new EntityNotFoundException("One or more permissions not found.");
         }
 
@@ -88,10 +84,25 @@ public class RoleService {
     }
 
     public void deleteRole(Long id){
-        if(!this.roleRepository.existsById(id)){
-            throw new EntityNotFoundException("Role not found.");
+        RoleEntity role = findEditableRole(id);
+
+        this.roleRepository.delete(role);
+    }
+
+    private RoleEntity findEditableRole(Long id){
+        RoleEntity role = this.roleRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found"));
+
+        if(RoleNames.SUPER_ADMIN.equalsIgnoreCase(role.getName())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This role cannot be modified.");
         }
 
-        this.roleRepository.deleteById(id);
+        return role;
+    }
+
+    private void assertNotReserved(String name){
+        if(RoleNames.SUPER_ADMIN.equalsIgnoreCase(name)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This role name is reserved.");
+        }
     }
 }
