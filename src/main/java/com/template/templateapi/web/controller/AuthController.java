@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
@@ -54,8 +55,8 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> me(Authentication authentication){
-        Map<String,Object> data = this.authService.getAuthenticatedUserData(authentication.getName());
+    public ResponseEntity<?> me(@AuthenticationPrincipal Long id){
+        Map<String,Object> data = this.authService.getAuthenticatedUserData(id);
 
         return ApiResponse.success(data, "User authenticated.", HttpStatus.OK);
     }

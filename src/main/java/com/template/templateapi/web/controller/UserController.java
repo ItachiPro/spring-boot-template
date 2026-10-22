@@ -52,8 +52,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserResponse>> getById(@PathVariable Long id){
-        UserEntity user = this.userService.getUserById(id);
+    public ResponseEntity<ApiResponse<UserResponse>> getById(@PathVariable Long id, @AuthenticationPrincipal Long currentId){
+        UserEntity user = this.userService.getUserById(id, currentId);
         return ApiResponse.success(UserResponse.fromEntity(user), "User found.");
     }
 

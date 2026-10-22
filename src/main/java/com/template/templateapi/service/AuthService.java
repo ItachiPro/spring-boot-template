@@ -52,8 +52,8 @@ public class AuthService {
         return this.jwtUtil.create(username);
     }
 
-    public Map<String, Object> getAuthenticatedUserData(String username){
-        UserEntity user = this.userRepository.findByUsernameWithRolesAndPermission(username)
+    public Map<String, Object> getAuthenticatedUserData(Long id){
+        UserEntity user = this.userRepository.findByIdWithRolesAndPermission(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found."));
 
         Set<String> roleNames = user.getRoles().stream()

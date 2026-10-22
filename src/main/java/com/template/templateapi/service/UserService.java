@@ -51,7 +51,11 @@ public class UserService {
         return this.userRepository.findVisibleUsers(currentId, RoleNames.SUPER_ADMIN, pageable);
     }
 
-    public UserEntity getUserById(Long id){
+    public UserEntity getUserById(Long id, Long currentId){
+        if(Objects.equals(id, currentId)){
+            throw new EntityNotFoundException("User not found.");
+        }
+
         return findVisibleOrFail(id);
     }
 
